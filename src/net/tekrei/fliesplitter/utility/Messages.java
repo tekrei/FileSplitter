@@ -24,7 +24,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package net.tekrei.filesplitter.gui;
+package net.tekrei.fliesplitter.utility;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -34,10 +34,6 @@ public class Messages {
 	private static String LANGUAGE = null;
 	private static ResourceBundle RESOURCE_BUNDLE = null;
 	private static Messages _instance = null;
-
-	//special characters
-	public static String LINE_END = System.getProperty("line.separator");
-	public static String CHECKSUM_EXTENSION = ".checksum.txt";
 
 	//message tags
 	public static String mainFrameTitle = "AnaPencere.Baslik";
@@ -73,6 +69,7 @@ public class Messages {
 	public static String checksumCreated = "DosyaParcalayici.ChecksumCreated";
 	public static String checksumError = "DosyaParcalayici.ChecksumError";
 	public static String checksumOK = "DosyaParcalayici.ChecksumOK";
+	public static String fileExistsError = "DosyaParcalayici.FileExists";
 
 	// Turkish
 	public static final String TR = "tr"; //$NON-NLS-1$

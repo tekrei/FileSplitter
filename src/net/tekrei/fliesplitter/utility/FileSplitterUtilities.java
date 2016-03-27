@@ -42,7 +42,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import net.tekrei.filesplitter.gui.MainFrame;
-import net.tekrei.filesplitter.gui.Messages;
 
 public class FileSplitterUtilities {
 	private static long SIZE_MULTIPLIER = 1000;
@@ -50,11 +49,8 @@ public class FileSplitterUtilities {
 	private MainFrame mainFrame;
 	private JFileChooser fileChooser;
 	private File selectedFile;
+	public static String CHECKSUM_EXTENSION = ".checksum.txt";
 
-	//TODO: check if file exists
-	//TODO: better checksum control
-	//TODO: better messages
-	
 	public FileSplitterUtilities(MainFrame _anaPencere) {
 		this.mainFrame = _anaPencere;
 	}
@@ -65,10 +61,9 @@ public class FileSplitterUtilities {
 			fileChooser = new JFileChooser();
 		}
 
-		if (fileChooser.showDialog(null,
+		if (fileChooser.showDialog(mainFrame,
 				Messages.getInstance().getString(Messages.select)) == JFileChooser.APPROVE_OPTION) {
-
-			// Select file to split/join
+			// file to split/join
 			selectedFile = fileChooser.getSelectedFile();
 			mainFrame.setSelectedFile(selectedFile.getAbsolutePath());
 		}
@@ -119,7 +114,6 @@ public class FileSplitterUtilities {
 		if (selectedFileExtension >= 0) {
 			mainFrame.operationStarted(Messages.getInstance().getString(Messages.joining));
 
-			// we should join all files
 			// find resulting file name
 			String fileName = fileNameToJoin(selectedFile.getName());
 
@@ -128,6 +122,12 @@ public class FileSplitterUtilities {
 
 				// join files
 				File newFile = new File(filePath + File.separatorChar + fileName);
+				
+				if(newFile.exists()){
+					JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.fileExistsError)+newFile.getAbsolutePath());
+					mainFrame.operationFinished(Messages.getInstance().getString(Messages.joining));
+					return;
+				}
 
 				try {
 					FileOutputStream os = new FileOutputStream(newFile, true);
@@ -159,17 +159,18 @@ public class FileSplitterUtilities {
 
 					outCh.close();
 					os.close();
-					//check checksum if file exists
-					try{
-						File checksumFile = new File(newFile.getAbsolutePath()+Messages.CHECKSUM_EXTENSION);
+					// check checksum if file exists
+					try {
+						File checksumFile = new File(newFile.getAbsolutePath() + CHECKSUM_EXTENSION);
 						String checksum = new String(Files.readAllBytes((checksumFile.toPath())));
 						String newChecksum = getMD5Checksum(newFile.getAbsolutePath());
-						if(!checksum.equals(newChecksum)){
-							mainFrame.notify(Messages.getInstance().getString(Messages.checksumError)+checksum+"|"+newChecksum);
-						}else{
+						if (!checksum.equals(newChecksum)) {
+							mainFrame.notify(Messages.getInstance().getString(Messages.checksumError) + checksum + "|"
+									+ newChecksum);
+						} else {
 							mainFrame.notify(Messages.getInstance().getString(Messages.checksumOK));
 						}
-					}catch(Exception e){
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				} catch (IOException e) {
@@ -178,7 +179,7 @@ public class FileSplitterUtilities {
 			}
 
 			mainFrame.operationFinished(Messages.getInstance().getString(Messages.joining));
-		}else{
+		} else {
 			// extension is not a number
 			// show error to the user
 			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.partError));
@@ -204,42 +205,30 @@ public class FileSplitterUtilities {
 	}
 
 	private int getFileExtension(String fileName) {
-		int noktaKonum = fileName.lastIndexOf(".");
+		int dotPosition = fileName.lastIndexOf(".");
 
-		if (noktaKonum >= 0) {
-			String noktadanSonra = fileName.substring(noktaKonum + 1);
-
+		if (dotPosition >= 0) {
+			String afterDot = fileName.substring(dotPosition + 1);
 			try {
-				int noktadanSonraInt = Integer.parseInt(noktadanSonra);
-
-				return noktadanSonraInt;
+				return Integer.parseInt(afterDot);
 			} catch (NumberFormatException e) {
 				return -1;
 			}
 		}
-
 		return -1;
 	}
 
 	public void split(String expectedSize, String sizeType) {
 		long sizeLimit = calculateSize(expectedSize, sizeType);
-		String checksum = null;
-		try {
-			checksum = getMD5Checksum(selectedFile.getAbsolutePath());
-			mainFrame.notify("Checksum:"+checksum);
-		} catch (Exception e1) {
-		}
-
 		if (selectedFile.length() <= sizeLimit) {
 			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.limitError));
 			return;
 		}
 
 		mainFrame.operationStarted(Messages.getInstance().getString(Messages.splitting));
-
-		// Find number of pieces
 		mainFrame.notify(Messages.getInstance().getString(Messages.fileSize) + selectedFile.length());
 
+		// Find number of pieces
 		float f = (float) selectedFile.length() / (float) sizeLimit;
 		long fileCount = (long) Math.ceil(f);
 		mainFrame.notify(Messages.getInstance().getString(Messages.fileCount) + fileCount);
@@ -254,7 +243,9 @@ public class FileSplitterUtilities {
 			for (int i = 0; i < fileCount; i++) {
 				File newFile = new File(selectedFile.getAbsolutePath() + getExtension(i));
 
-				if (newFile.exists() && (!fileExistsError(newFile.getAbsolutePath()))) {
+				if (newFile.exists()) {
+					JOptionPane.showMessageDialog(mainFrame,
+							newFile.getAbsolutePath() + Messages.getInstance().getString(Messages.overwrite));
 					in.close();
 					mainFrame.operationFinished(Messages.getInstance().getString(Messages.splitting));
 
@@ -288,23 +279,19 @@ public class FileSplitterUtilities {
 			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.error) + e.getMessage());
 		}
 		mainFrame.operationFinished(Messages.getInstance().getString(Messages.splitting));
-		//create checksum file
-		try{
-			String checksumFileName = selectedFile.getAbsolutePath()+Messages.CHECKSUM_EXTENSION;
+		try {
+			// find checksum and create checksum file
+			String checksum = getMD5Checksum(selectedFile.getAbsolutePath());
+			mainFrame.notify("Checksum:" + checksum);
+			String checksumFileName = selectedFile.getAbsolutePath() + CHECKSUM_EXTENSION;
 			File checksumFile = new File(checksumFileName);
 			FileWriter fw = new FileWriter(checksumFile.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(checksum);
 			bw.close();
-			mainFrame.notify(Messages.getInstance().getString(Messages.checksumCreated)+checksumFileName);
-		}catch(Exception e){
+			mainFrame.notify(Messages.getInstance().getString(Messages.checksumCreated) + checksumFileName);
+		} catch (Exception e) {
 		}
-	}
-
-	private boolean fileExistsError(String dosyaAdi) {
-		JOptionPane.showMessageDialog(mainFrame, dosyaAdi + Messages.getInstance().getString(Messages.overwrite));
-
-		return false;
 	}
 
 	private String getExtension(int i) {
