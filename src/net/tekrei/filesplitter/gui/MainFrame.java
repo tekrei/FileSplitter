@@ -49,15 +49,15 @@ import net.tekrei.fliesplitter.utility.FileSplitterUtilities;
 public class MainFrame extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel jcp = null;
-    private JButton btnDosyaSec;
-    private JTextField txtDosyaIsmi;
-    private JButton btnParcala;
-    private JButton btnBirlestir;
-    private FileSplitterUtilities dosyaParcalayici;
-    private JTextArea txtDuyuru;
-    private JScrollPane scrDuyuru;
-    private JTextField txtBoyut;
-    private JComboBox<String> cmbBoyutTipi;
+    private JButton btnSelectFile;
+    private JTextField txtFileName;
+    private JButton btnSplit;
+    private JButton btnJoin;
+    private FileSplitterUtilities fileSplitter;
+    private JTextArea txtNotification;
+    private JScrollPane scrNotification;
+    private JTextField txtSize;
+    private JComboBox<String> cmbSizeType;
 
     public MainFrame() {
         super();
@@ -78,7 +78,7 @@ public class MainFrame extends JFrame {
             Messages.getInstance().initialize(Messages.EN);
         }
 
-        dosyaParcalayici = new FileSplitterUtilities(this);
+        fileSplitter = new FileSplitterUtilities(this);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(397, 282);
         this.setResizable(false);
@@ -88,7 +88,7 @@ public class MainFrame extends JFrame {
     private void generateUI() {
         this.setContentPane(getJcp());
         this.setJMenuBar(generateMenuBar());
-        this.setTitle(Messages.getInstance().getString("AnaPencere.Baslik")); //$NON-NLS-1$
+        this.setTitle(Messages.getInstance().getString(Messages.mainFrameTitle)); 
         reset();
     }
 
@@ -119,140 +119,139 @@ public class MainFrame extends JFrame {
     private JLabel getLblDosyaBoyut() {
         JLabel lblDosyaBoyut = new JLabel();
         lblDosyaBoyut.setBounds(new java.awt.Rectangle(0, 40, 111, 21));
-        lblDosyaBoyut.setText(Messages.getInstance().getString("AnaPencere.ParcaBoyutuEtiket")); //$NON-NLS-1$
+        lblDosyaBoyut.setText(Messages.getInstance().getString(Messages.sizeTag)); 
 
         return lblDosyaBoyut;
     }
 
     private void reset() {
-        txtBoyut.setText(""); //$NON-NLS-1$
-        txtDosyaIsmi.setText(""); //$NON-NLS-1$
-        txtDuyuru.setText(""); //$NON-NLS-1$
-        cmbBoyutTipi.setSelectedIndex(1);
-        btnDosyaSec.grabFocus();
+        txtSize.setText("100"); 
+        txtFileName.setText(""); 
+        txtNotification.setText(""); 
+        cmbSizeType.setSelectedIndex(2);
+        btnSelectFile.grabFocus();
         jcp.updateUI();
     }
 
     private JButton getBtnDosyaSec() {
-        btnDosyaSec = new JButton();
-        btnDosyaSec.setBounds(new java.awt.Rectangle(280, 10, 111, 21));
-        btnDosyaSec.setText(Messages.getInstance().getString("AnaPencere.DosyaSecEtiket")); //$NON-NLS-1$
-        btnDosyaSec.setToolTipText(Messages.getInstance().getString("AnaPencere.DosyaSecTooltip")); //$NON-NLS-1$
-        btnDosyaSec.setMnemonic('s');
-        btnDosyaSec.addActionListener(new ActionListener() {
+        btnSelectFile = new JButton();
+        btnSelectFile.setBounds(new java.awt.Rectangle(280, 10, 111, 21));
+        btnSelectFile.setText(Messages.getInstance().getString(Messages.selectFile)); 
+        btnSelectFile.setToolTipText(Messages.getInstance().getString(Messages.selectFileTooltip)); 
+        btnSelectFile.setMnemonic('s');
+        btnSelectFile.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    dosyaParcalayici.selectFile();
+                    fileSplitter.selectFile();
                 }
             });
 
-        return btnDosyaSec;
+        return btnSelectFile;
     }
 
     private JTextField getTxtDosyaIsmi() {
-        txtDosyaIsmi = new JTextField();
-        txtDosyaIsmi.setBounds(new java.awt.Rectangle(0, 10, 281, 21));
-        txtDosyaIsmi.setEditable(false);
+        txtFileName = new JTextField();
+        txtFileName.setBounds(new java.awt.Rectangle(0, 10, 281, 21));
+        txtFileName.setEditable(false);
 
-        return txtDosyaIsmi;
+        return txtFileName;
     }
 
     private JButton getBtnParcala() {
-        btnParcala = new JButton();
-        btnParcala.setBounds(new java.awt.Rectangle(0, 70, 191, 21));
-        btnParcala.setToolTipText(Messages.getInstance().getString("AnaPencere.ParcalaTooltip")); //$NON-NLS-1$
-        btnParcala.setText(Messages.getInstance().getString("AnaPencere.ParcalaEtiket")); //$NON-NLS-1$
-        btnParcala.setMnemonic('p');
-        btnParcala.addActionListener(new ActionListener() {
+        btnSplit = new JButton();
+        btnSplit.setBounds(new java.awt.Rectangle(0, 70, 191, 21));
+        btnSplit.setToolTipText(Messages.getInstance().getString(Messages.splitTooltip)); 
+        btnSplit.setText(Messages.getInstance().getString(Messages.split)); 
+        btnSplit.setMnemonic('p');
+        btnSplit.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    if (txtBoyut.getText().equals("")) { //$NON-NLS-1$
+                    if (txtSize.getText().equals("")) { 
                         JOptionPane.showMessageDialog(null,
-                            Messages.getInstance().getString("AnaPencere.BoyutSiniriUyari")); //$NON-NLS-1$
+                            Messages.getInstance().getString(Messages.sizeWarning)); 
                     } else {
-                        dosyaParcalayici.split(txtBoyut.getText(),
-                            cmbBoyutTipi.getSelectedItem().toString());
+                        fileSplitter.split(txtSize.getText(),
+                            cmbSizeType.getSelectedItem().toString());
                     }
                 }
             });
 
-        return btnParcala;
+        return btnSplit;
     }
 
     private JButton getBtnBirlestir() {
-        btnBirlestir = new JButton();
-        btnBirlestir.setBounds(new java.awt.Rectangle(200, 70, 191, 21));
-        btnBirlestir.setText(Messages.getInstance().getString("AnaPencere.BirlestirEtiket")); //$NON-NLS-1$
-        btnBirlestir.setToolTipText(Messages.getInstance().getString("AnaPencere.BirlestirTooltip")); //$NON-NLS-1$
-        btnBirlestir.setMnemonic('i');
-        btnBirlestir.addActionListener(new ActionListener() {
+        btnJoin = new JButton();
+        btnJoin.setBounds(new java.awt.Rectangle(200, 70, 191, 21));
+        btnJoin.setText(Messages.getInstance().getString(Messages.join)); 
+        btnJoin.setToolTipText(Messages.getInstance().getString(Messages.joinTooltip)); 
+        btnJoin.setMnemonic('i');
+        btnJoin.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    dosyaParcalayici.join();
+                    fileSplitter.join();
                 }
             });
 
-        return btnBirlestir;
+        return btnJoin;
     }
 
     private JScrollPane getTxtDuyuru() {
-        txtDuyuru = new JTextArea();
-        txtDuyuru.setEditable(false);
-        scrDuyuru = new JScrollPane(txtDuyuru);
-        scrDuyuru.setBounds(new java.awt.Rectangle(10, 100, 371, 131));
+        txtNotification = new JTextArea();
+        txtNotification.setEditable(false);
+        scrNotification = new JScrollPane(txtNotification);
+        scrNotification.setBounds(new java.awt.Rectangle(10, 100, 371, 131));
 
-        return scrDuyuru;
+        return scrNotification;
     }
 
     private JTextField getTxtBoyut() {
-        txtBoyut = new JTextField();
-        txtBoyut.setBounds(new java.awt.Rectangle(120, 40, 191, 21));
-        txtBoyut.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtSize = new JTextField();
+        txtSize.setBounds(new java.awt.Rectangle(120, 40, 191, 21));
+        txtSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
 
-        return txtBoyut;
+        return txtSize;
     }
 
     private JComboBox<String> getCmbBoyutTipi() {
-        cmbBoyutTipi = new JComboBox<String>(FileSplitterUtilities.SIZE_INFO);
-        cmbBoyutTipi.setBounds(new java.awt.Rectangle(320, 40, 71, 21));
-        cmbBoyutTipi.setSelectedIndex(1);
+        cmbSizeType = new JComboBox<String>(FileSplitterUtilities.SIZE_INFO);
+        cmbSizeType.setBounds(new java.awt.Rectangle(320, 40, 71, 21));
 
-        return cmbBoyutTipi;
+        return cmbSizeType;
     }
 
     public void notify(String duyuru) {
-        txtDuyuru.setText(txtDuyuru.getText() + duyuru + "\n"); //$NON-NLS-1$
+        txtNotification.setText(txtNotification.getText() + duyuru + Messages.LINE_END); 
         this.getContentPane().update(this.getContentPane().getGraphics());
     }
 
     public void setSelectedFile(String absolutePath) {
-        txtDosyaIsmi.setText(absolutePath);
+        txtFileName.setText(absolutePath);
     }
 
     public void operationStarted(String islem) {
-        notify(islem + " " + //$NON-NLS-1$
-            Messages.getInstance().getString("AnaPencere.IslemBasladi")); //$NON-NLS-1$
-        btnParcala.setEnabled(false);
+        notify(islem + " " + 
+            Messages.getInstance().getString(Messages.started)); 
+        btnSplit.setEnabled(false);
     }
 
     public void operationFinished(String islem) {
-        notify(islem + " " + //$NON-NLS-1$
-            Messages.getInstance().getString("AnaPencere.IslemTamamlandi")); //$NON-NLS-1$
-        btnParcala.setEnabled(true);
+        notify(islem + " " + 
+            Messages.getInstance().getString(Messages.complete)); 
+        btnSplit.setEnabled(true);
     }
 
     private JMenuBar generateMenuBar() {
         JMenuBar menu = new JMenuBar();
         menu.add(generateDosyaMenu());
-        menu.add(generateDilMenu());
+        menu.add(generateLanguageMenu());
 
         return menu;
     }
 
-    private JMenu generateDilMenu() {
-        JMenu mnDil = new JMenu(Messages.getInstance().getString("AnaPencere.Dil")); //$NON-NLS-1$
+    private JMenu generateLanguageMenu() {
+        JMenu mnDil = new JMenu(Messages.getInstance().getString(Messages.language)); 
 
         ButtonGroup btnGrp = new ButtonGroup();
 
         JRadioButtonMenuItem item = new JRadioButtonMenuItem(Messages.getInstance()
-                                                                     .getString("AnaPencere.Turkce")); //$NON-NLS-1$
+                                                                     .getString(Messages.turkish)); 
         btnGrp.add(item);
 
         if (Messages.getInstance().getLanguage().equals(Messages.TR)) {
@@ -266,7 +265,7 @@ public class MainFrame extends JFrame {
             });
         mnDil.add(item);
 
-        item = new JRadioButtonMenuItem(Messages.getInstance().getString("AnaPencere.Ingilizce")); //$NON-NLS-1$
+        item = new JRadioButtonMenuItem(Messages.getInstance().getString(Messages.english)); 
 
         if (Messages.getInstance().getLanguage().equals(Messages.EN)) {
             item.setSelected(true);
@@ -284,18 +283,18 @@ public class MainFrame extends JFrame {
     }
 
     private JMenu generateDosyaMenu() {
-        JMenu mnDosya = new JMenu(Messages.getInstance().getString("AnaPencere.Dosya")); //$NON-NLS-1$
+        JMenu mnDosya = new JMenu(Messages.getInstance().getString(Messages.file)); 
 
-        JMenuItem item = new JMenuItem(Messages.getInstance().getString("AnaPencere.Hakkinda")); //$NON-NLS-1$
+        JMenuItem item = new JMenuItem(Messages.getInstance().getString(Messages.about)); 
         item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     JOptionPane.showMessageDialog(null,
-                        Messages.getInstance().getString("AnaPencere.Lisans")); //$NON-NLS-1$
+                        Messages.getInstance().getString(Messages.license)); 
                 }
             });
         mnDosya.add(item);
 
-        item = new JMenuItem(Messages.getInstance().getString("AnaPencere.Temizle")); //$NON-NLS-1$
+        item = new JMenuItem(Messages.getInstance().getString(Messages.clear)); 
         item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     reset();
@@ -303,7 +302,7 @@ public class MainFrame extends JFrame {
             });
         mnDosya.add(item);
 
-        item = new JMenuItem(Messages.getInstance().getString("AnaPencere.Cikis")); //$NON-NLS-1$
+        item = new JMenuItem(Messages.getInstance().getString(Messages.exit)); 
         item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     System.exit(0);

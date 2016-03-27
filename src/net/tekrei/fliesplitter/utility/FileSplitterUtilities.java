@@ -26,12 +26,17 @@
  */
 package net.tekrei.fliesplitter.utility;
 
+import java.io.BufferedWriter;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.security.MessageDigest;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -41,14 +46,15 @@ import net.tekrei.filesplitter.gui.Messages;
 
 public class FileSplitterUtilities {
 	private static long SIZE_MULTIPLIER = 1000;
-	public static final String[] SIZE_INFO = { "B", //$NON-NLS-1$
-			"KB", //$NON-NLS-1$
-			"MB", //$NON-NLS-1$
-			"GB" };
+	public static final String[] SIZE_INFO = { "B", "KB", "MB", "GB" };
 	private MainFrame mainFrame;
 	private JFileChooser fileChooser;
 	private File selectedFile;
 
+	//TODO: check if file exists
+	//TODO: better checksum control
+	//TODO: better messages
+	
 	public FileSplitterUtilities(MainFrame _anaPencere) {
 		this.mainFrame = _anaPencere;
 	}
@@ -60,7 +66,7 @@ public class FileSplitterUtilities {
 		}
 
 		if (fileChooser.showDialog(null,
-				Messages.getInstance().getString("DosyaParcalayici.Sec")) == JFileChooser.APPROVE_OPTION) { //$NON-NLS-1$
+				Messages.getInstance().getString(Messages.select)) == JFileChooser.APPROVE_OPTION) {
 
 			// Select file to split/join
 			selectedFile = fileChooser.getSelectedFile();
@@ -68,12 +74,50 @@ public class FileSplitterUtilities {
 		}
 	}
 
+	/**
+	 * Source : http://www.rgagnon.com/javadetails/java-0416.html
+	 * https://stackoverflow.com/questions/304268/getting-a-files-md5-checksum-
+	 * in-java
+	 */
+	private byte[] createChecksum(String filename) throws Exception {
+		InputStream fis = new FileInputStream(filename);
+
+		byte[] buffer = new byte[1024];
+		MessageDigest complete = MessageDigest.getInstance("MD5");
+		int numRead;
+
+		do {
+			numRead = fis.read(buffer);
+			if (numRead > 0) {
+				complete.update(buffer, 0, numRead);
+			}
+		} while (numRead != -1);
+
+		fis.close();
+		return complete.digest();
+	}
+
+	/**
+	 * Source : http://www.rgagnon.com/javadetails/java-0416.html
+	 * https://stackoverflow.com/questions/304268/getting-a-files-md5-checksum-
+	 * in-java
+	 */
+	public String getMD5Checksum(String filename) throws Exception {
+		byte[] b = createChecksum(filename);
+		String result = "";
+
+		for (int i = 0; i < b.length; i++) {
+			result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
+		}
+		return result;
+	}
+
 	public void join() {
 		// check extension of selected file
 		int selectedFileExtension = getFileExtension(selectedFile.getName());
 
 		if (selectedFileExtension >= 0) {
-			mainFrame.operationStarted(Messages.getInstance().getString("DosyaParcalayici.Birlestirme")); //$NON-NLS-1$
+			mainFrame.operationStarted(Messages.getInstance().getString(Messages.joining));
 
 			// we should join all files
 			// find resulting file name
@@ -93,8 +137,8 @@ public class FileSplitterUtilities {
 
 					while (selectedFile.exists()) {
 						FileInputStream in = new FileInputStream(selectedFile);
-						mainFrame.notify(selectedFile.getName()
-								+ Messages.getInstance().getString("DosyaParcalayici.DosyaEkleniyor")); //$NON-NLS-1$
+						mainFrame
+								.notify(selectedFile.getName() + Messages.getInstance().getString(Messages.fileAdding));
 
 						try {
 							FileChannel inCh = in.getChannel();
@@ -115,22 +159,35 @@ public class FileSplitterUtilities {
 
 					outCh.close();
 					os.close();
+					//check checksum if file exists
+					try{
+						File checksumFile = new File(newFile.getAbsolutePath()+Messages.CHECKSUM_EXTENSION);
+						String checksum = new String(Files.readAllBytes((checksumFile.toPath())));
+						String newChecksum = getMD5Checksum(newFile.getAbsolutePath());
+						if(!checksum.equals(newChecksum)){
+							mainFrame.notify(Messages.getInstance().getString(Messages.checksumError)+checksum+"|"+newChecksum);
+						}else{
+							mainFrame.notify(Messages.getInstance().getString(Messages.checksumOK));
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 
-			mainFrame.operationFinished(Messages.getInstance().getString("DosyaParcalayici.Birlestirme")); //$NON-NLS-1$
+			mainFrame.operationFinished(Messages.getInstance().getString(Messages.joining));
+		}else{
+			// extension is not a number
+			// show error to the user
+			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.partError));
 		}
-
-		// extension is not a number
-		// show error to the user
-		JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString("DosyaParcalayici.ParcaDosyaHata")); //$NON-NLS-1$
 	}
 
 	private String fileNameToJoin(String fileName) {
 		// find last position of the dot (.)
-		int dotPosition = fileName.lastIndexOf("."); //$NON-NLS-1$
+		int dotPosition = fileName.lastIndexOf(".");
 
 		if (dotPosition >= 0) {
 			return fileName.substring(0, dotPosition);
@@ -146,13 +203,11 @@ public class FileSplitterUtilities {
 		return fileName.substring(0, lastSeparatorIndex);
 	}
 
-	private int getFileExtension(String dosyaIsmi) {
-		// Bunu nasil kontrol edecegiz?
-		// Eger uzantisi int sayiya donusebiliyorsa bu parca dosyadir
-		int noktaKonum = dosyaIsmi.lastIndexOf("."); //$NON-NLS-1$
+	private int getFileExtension(String fileName) {
+		int noktaKonum = fileName.lastIndexOf(".");
 
 		if (noktaKonum >= 0) {
-			String noktadanSonra = dosyaIsmi.substring(noktaKonum + 1);
+			String noktadanSonra = fileName.substring(noktaKonum + 1);
 
 			try {
 				int noktadanSonraInt = Integer.parseInt(noktadanSonra);
@@ -168,22 +223,26 @@ public class FileSplitterUtilities {
 
 	public void split(String expectedSize, String sizeType) {
 		long sizeLimit = calculateSize(expectedSize, sizeType);
+		String checksum = null;
+		try {
+			checksum = getMD5Checksum(selectedFile.getAbsolutePath());
+			mainFrame.notify("Checksum:"+checksum);
+		} catch (Exception e1) {
+		}
 
 		if (selectedFile.length() <= sizeLimit) {
-			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString("DosyaParcalayici.SinirHata")); //$NON-NLS-1$
+			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.limitError));
 			return;
 		}
 
-		mainFrame.operationStarted(Messages.getInstance().getString("DosyaParcalayici.Parcalama")); //$NON-NLS-1$
+		mainFrame.operationStarted(Messages.getInstance().getString(Messages.splitting));
 
 		// Find number of pieces
-		mainFrame.notify(Messages.getInstance().getString("DosyaParcalayici.DosyaBoyutMesaj") + //$NON-NLS-1$
-				selectedFile.length());
+		mainFrame.notify(Messages.getInstance().getString(Messages.fileSize) + selectedFile.length());
 
 		float f = (float) selectedFile.length() / (float) sizeLimit;
 		long fileCount = (long) Math.ceil(f);
-		mainFrame.notify(Messages.getInstance().getString("DosyaParcalayici.DosyaAdediMesaj") + //$NON-NLS-1$
-				fileCount);
+		mainFrame.notify(Messages.getInstance().getString(Messages.fileCount) + fileCount);
 
 		// start splitting the file
 		try {
@@ -197,13 +256,12 @@ public class FileSplitterUtilities {
 
 				if (newFile.exists() && (!fileExistsError(newFile.getAbsolutePath()))) {
 					in.close();
-					mainFrame.operationFinished(Messages.getInstance().getString("DosyaParcalayici.Parcalama")); //$NON-NLS-1$
+					mainFrame.operationFinished(Messages.getInstance().getString(Messages.splitting));
 
 					return;
 				}
 
-				mainFrame.notify(
-						newFile.getName() + Messages.getInstance().getString("DosyaParcalayici.DosyaYaratiliyor")); //$NON-NLS-1$
+				mainFrame.notify(newFile.getName() + Messages.getInstance().getString(Messages.creating));
 
 				try {
 					FileOutputStream out = new FileOutputStream(newFile);
@@ -227,36 +285,40 @@ public class FileSplitterUtilities {
 			in.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString("DosyaParcalayici.HataMesaj") + //$NON-NLS-1$
-					e.getMessage());
+			JOptionPane.showMessageDialog(mainFrame, Messages.getInstance().getString(Messages.error) + e.getMessage());
 		}
-
-		mainFrame.operationFinished(Messages.getInstance().getString("DosyaParcalayici.Parcalama")); //$NON-NLS-1$
+		mainFrame.operationFinished(Messages.getInstance().getString(Messages.splitting));
+		//create checksum file
+		try{
+			String checksumFileName = selectedFile.getAbsolutePath()+Messages.CHECKSUM_EXTENSION;
+			File checksumFile = new File(checksumFileName);
+			FileWriter fw = new FileWriter(checksumFile.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(checksum);
+			bw.close();
+			mainFrame.notify(Messages.getInstance().getString(Messages.checksumCreated)+checksumFileName);
+		}catch(Exception e){
+		}
 	}
 
 	private boolean fileExistsError(String dosyaAdi) {
-		JOptionPane.showMessageDialog(mainFrame,
-				dosyaAdi + Messages.getInstance().getString("DosyaParcalayici.UstuneYazmaSorgu")); //$NON-NLS-1$
+		JOptionPane.showMessageDialog(mainFrame, dosyaAdi + Messages.getInstance().getString(Messages.overwrite));
 
 		return false;
 	}
 
 	private String getExtension(int i) {
-		String extension = " "; //$NON-NLS-1$
+		String extension = " ";
 
 		if (i < 10) {
-			extension = "00" + //$NON-NLS-1$
-					i;
+			extension = "00" + i;
 		} else if (i < 100) {
-			extension = "0" + //$NON-NLS-1$
-					i;
+			extension = "0" + i;
 		} else {
-			extension = " " + //$NON-NLS-1$
-					i;
+			extension = " " + i;
 		}
 
-		return "." + //$NON-NLS-1$
-				extension;
+		return "." + extension;
 	}
 
 	private long calculateSize(String boyut, String boyutTipi) {
