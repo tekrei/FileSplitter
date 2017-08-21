@@ -1,0 +1,46 @@
+<installation version="5.0">
+    <info>
+        <appname>File Splitter</appname>
+        <appversion>1.0</appversion>
+        <authors>
+            <author name="T. E. Kalayci" email="tekrei@gmail.com"/>
+        </authors>
+        <url>https://tekrei.github.io</url>
+        <javaversion>1.8</javaversion>
+    </info>
+
+    <locale>
+        <langpack iso3="tur"/>
+        <langpack iso3="eng"/>
+    </locale>
+
+    <guiprefs width="800" height="600" resizable="no">
+        <splash>kvu.gif</splash>
+    </guiprefs>
+
+    <resources>
+        <res src="gpl.txt" id="LicencePanel.licence"/>
+        <res src="kvu.gif" id="installer.langsel.img"/>
+    </resources>
+
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel"/>
+        <panel classname="InstallPanel"/>
+        <panel classname="FinishPanel"/>
+    </panels>
+
+    <packs>
+        <pack name="Core" required="yes">
+            <description>Main files required to run the FileSplitter</description>
+            <file src="../../../target/FileSplitter-1.0.jar" targetdir="$INSTALL_PATH/"/>
+            <file src="run.sh" targetdir="$INSTALL_PATH/"/>
+            <file src="run.bat" targetdir="$INSTALL_PATH/"/>
+            <file src="gpl_tr.txt" targetdir="$INSTALL_PATH/license/"/>
+            <file src="gpl.txt" targetdir="$INSTALL_PATH/license/"/>
+            <executable targetfile="$INSTALL_PATH/run.sh" stage="never"/>
+            <executable targetfile="$INSTALL_PATH/run.bat" stage="never"/>
+        </pack>
+    </packs>
+</installation>
