@@ -4,7 +4,7 @@ A simple file splitter and joiner program developed in _2006_ to use personally.
 
 Updated with checksum implementation and uploaded to the GitHub in _2016_.
 
-Updated with maven support. You need to execute `mvn clean compile assembly:single install` to get an installer file produced by [IzPack](http://izpack.org/).
+Updated with maven support. You need to execute `mvn clean compile assembly:single package` to get an installer file produced by [IzPack](http://izpack.org/).
 
 ## LICENSE
 
