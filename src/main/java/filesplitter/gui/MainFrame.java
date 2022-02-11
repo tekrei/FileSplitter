@@ -6,7 +6,7 @@
  * Boyutu buyuk dosyalari tasinmayi kolaylastirmak icin belirlenen
  * boyutta parcalara ayirir, daha onceden parcalanmis dosyalari birlestirir
  * 
- * 2006 Tahir Emre KALAYCI
+ * 2006
  * 
  * This file is a part of DosyaParcalayici
  * 
@@ -24,10 +24,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package net.tekrei.filesplitter.gui;
+package filesplitter.gui;
 
-import net.tekrei.filesplitter.utility.FileSplitterUtilities;
-import net.tekrei.filesplitter.utility.Messages;
+import filesplitter.utility.FileSplitterUtilities;
+import filesplitter.utility.Messages;
 
 import javax.swing.*;
 import java.io.File;

@@ -3,30 +3,17 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>tekrei</groupId>
+    <groupId>net</groupId>
     <artifactId>FileSplitter</artifactId>
     <version>1.0</version>
-    <packaging>pom</packaging>
     <name>Simple File Splitter</name>
-    <url>https://tekrei.gitlab.io</url>
+    <url>https://github.com/tekrei/hedos</url>
     <licenses>
         <license>
-            <name>GNU General Public License (GPL)</name>
-            <url>http://www.gnu.org/licenses/gpl.txt</url>
+            <name>GNU General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
         </license>
     </licenses>
-    <scm>
-        <connection>scm:git:git@github.com:tekrei/FileSplitter.git</connection>
-        <developerConnection>scm:git:git@github.com:tekrei/FileSplitter.git</developerConnection>
-        <url>git@github.com:tekrei/FileSplitter.git</url>
-        <tag>HEAD</tag>
-    </scm>
-    <developers>
-        <developer>
-            <id>tekrei</id>
-            <name>T. E. KALAYCI</name>
-        </developer>
-    </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
@@ -44,7 +31,7 @@
                     <baseDir>${izpack.dir}</baseDir>
                     <installFile>${izpack.dir}/install.xml</installFile>
                     <outputDirectory>${project.build.directory}</outputDirectory>
-                    <finalName>${project.artifactId}-${project.version}-installer</finalName>
+                    <finalName>${project.build.finalName}</finalName>
                     <enableOverrideArtifact>true</enableOverrideArtifact>
                     <mkdirs>true</mkdirs>
                 </configuration>
@@ -64,7 +51,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>net.tekrei.filesplitter.gui.MainFrame</mainClass>
+                            <mainClass>filesplitter.gui.MainFrame</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
