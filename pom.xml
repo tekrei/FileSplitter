@@ -7,67 +7,59 @@
     <artifactId>FileSplitter</artifactId>
     <version>1.0</version>
     <name>Simple File Splitter</name>
-    <url>https://github.com/tekrei/hedos</url>
+    <url>https://github.com/tekrei/filesplitter</url>
     <licenses>
         <license>
             <name>GNU General Public License v3.0</name>
             <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
         </license>
     </licenses>
+    <scm>
+        <connection>scm:git:git@github.com:tekrei/FileSplitter.git</connection>
+        <developerConnection>scm:git:git@github.com:tekrei/FileSplitter.git</developerConnection>
+        <url>git@github.com:tekrei/FileSplitter.git</url>
+        <tag>HEAD</tag>
+    </scm>
+    <developers>
+        <developer>
+            <id>tekrei</id>
+            <name>T. E. KALAYCI</name>
+        </developer>
+    </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.version>3.8.1</maven.compiler.version>
-        <izpack.dir>${basedir}/src/main/izpack</izpack.dir>
     </properties>
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.izpack</groupId>
-                <artifactId>izpack-maven-plugin</artifactId>
-                <version>5.1.3</version>
-                <extensions>true</extensions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.9.0</version>
                 <configuration>
-                    <baseDir>${izpack.dir}</baseDir>
-                    <installFile>${izpack.dir}/install.xml</installFile>
-                    <outputDirectory>${project.build.directory}</outputDirectory>
-                    <finalName>${project.build.finalName}</finalName>
-                    <enableOverrideArtifact>true</enableOverrideArtifact>
-                    <mkdirs>true</mkdirs>
+                    <release>11</release>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>standard-installer</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>izpack</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>filesplitter.gui.MainFrame</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.version}</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>filesplitter.gui.MainFrame</mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
